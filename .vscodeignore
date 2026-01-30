@@ -1,0 +1,14 @@
+.vscode/**
+.vscode-test/**
+src/**
+test/**
+.gitignore
+.eslintrc.*
+eslint.config.mjs
+tsconfig.json
+vsc-extension-quickstart.md
+esbuild.js
+out/**
+.vscode-test.mjs
+pnpm-lock.yaml
+scripts/**

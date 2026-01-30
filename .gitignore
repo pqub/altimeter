@@ -1,0 +1,7 @@
+out
+dist
+node_modules
+.DS_Store
+*.vsix
+webview-ui/build
+webview-ui/node_modules
