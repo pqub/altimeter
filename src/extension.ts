@@ -122,7 +122,7 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 			logger.info(`[Sidebar] Fetching metadata for ${latest.cascadeId}...`);
 			const response = await client.getCascadeMetadata(latest.cascadeId);
 			const stats = StatsService.calculateStats(response.generatorMetadata || []);
-			logger.info(`[Sidebar] Stats: ${stats.totalCalls} calls, ${stats.totalInput + stats.totalOutput} tokens`);
+			logger.info(`[Sidebar] Stats: ${stats.totalCalls} calls`);
 
 			// Store in cache
 			cache.set(latest.cascadeId, latest.lastModifiedTime, stats);

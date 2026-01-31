@@ -3,6 +3,7 @@
 src/**
 test/**
 .gitignore
+docs/
 .eslintrc.*
 eslint.config.mjs
 tsconfig.json
