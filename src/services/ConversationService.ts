@@ -6,51 +6,50 @@
 import { LSClient } from '../core/LSClient';
 
 export interface ConversationSummary {
-    cascadeId: string;
-    summary: string;
-    lastModifiedTime: string;
-    stepCount: number;
+	cascadeId: string;
+	summary: string;
+	lastModifiedTime: string;
+	stepCount: number;
 }
 
 export class ConversationService {
-    constructor(private client: LSClient) { }
+	constructor(private client: LSClient) {}
 
-    /**
-     * Fetch all conversations, sorted by lastModifiedTime (newest first)
-     */
-    async fetchSortedConversations(): Promise<ConversationSummary[]> {
-        const response = await this.client.getAllCascadeTrajectories();
+	/**
+	 * Fetch all conversations, sorted by lastModifiedTime (newest first)
+	 */
+	async fetchSortedConversations(): Promise<ConversationSummary[]> {
+		const response = await this.client.getAllCascadeTrajectories();
 
-        const summaries = response.trajectorySummaries || {};
-        const items: ConversationSummary[] = [];
+		const summaries = response.trajectorySummaries || {};
+		const items: ConversationSummary[] = [];
 
-        for (const [_tid, summary] of Object.entries(summaries as Record<string, any>)) {
-            items.push({
-                cascadeId: summary.cascadeId || _tid,
-                summary: summary.summary || 'N/A',
-                lastModifiedTime: summary.lastModifiedTime || '',
-                stepCount: parseInt(summary.stepCount || '0', 10)
-            });
-        }
+		for (const [_tid, summary] of Object.entries(summaries as Record<string, any>)) {
+			items.push({
+				cascadeId: summary.cascadeId || _tid,
+				summary: summary.summary || 'N/A',
+				lastModifiedTime: summary.lastModifiedTime || '',
+				stepCount: parseInt(summary.stepCount || '0', 10),
+			});
+		}
 
-        items.sort((a, b) => (b.lastModifiedTime || '').localeCompare(a.lastModifiedTime || ''));
+		items.sort((a, b) => (b.lastModifiedTime || '').localeCompare(a.lastModifiedTime || ''));
 
-        return items;
-    }
+		return items;
+	}
 
-    /**
-     * Get the latest (most recently modified) conversation
-     */
-    async getLatestConversation(): Promise<ConversationSummary | null> {
-        const items = await this.fetchSortedConversations();
-        return items.length > 0 ? items[0] : null;
-    }
+	/**
+	 * Get the latest (most recently modified) conversation
+	 */
+	async getLatestConversation(): Promise<ConversationSummary | null> {
+		const items = await this.fetchSortedConversations();
+		return items.length > 0 ? items[0] : null;
+	}
 
-    /**
-     * Fetch generator metadata for stats calculation
-     */
-    async fetchCascadeMetadata(cascadeId: string): Promise<any> {
-        return this.client.getCascadeMetadata(cascadeId);
-    }
+	/**
+	 * Fetch generator metadata for stats calculation
+	 */
+	async fetchCascadeMetadata(cascadeId: string): Promise<any> {
+		return this.client.getCascadeMetadata(cascadeId);
+	}
 }
-

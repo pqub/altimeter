@@ -1,107 +1,113 @@
 {
-  "name": "altimeter",
-  "displayName": "Altimeter",
-  "description": "An extension for monitoring used/spent tokens in Antigravity IDE. Simple token usage stats.",
-  "version": "0.0.1",
-  "publisher": "pqub",
-  "icon": "resources/icon.png",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/pqub/altimeter.git"
-  },
-  "engines": {
-    "vscode": "^1.90.0"
-  },
-  "categories": [
-    "Other",
-    "Visualization"
-  ],
-  "keywords": [
-    "antigravity",
-    "ai",
-    "token",
-    "dashboard",
-    "monitor"
-  ],
-  "activationEvents": [
-    "onStartupFinished"
-  ],
-  "main": "./dist/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "altimeter.refresh",
-        "title": "Refresh Stats",
-        "category": "Altimeter",
-        "icon": "$(refresh)"
-      }
-    ],
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "altimeter",
-          "title": "Altimeter",
-          "icon": "$(rocket)"
-        }
-      ]
-    },
-    "views": {
-      "altimeter": [
-        {
-          "id": "altimeter.mainView",
-          "name": "Token Stats",
-          "type": "webview"
-        }
-      ]
-    },
-    "menus": {
-      "view/title": [
-        {
-          "command": "altimeter.refresh",
-          "when": "view == altimeter.mainView",
-          "group": "navigation"
-        }
-      ]
-    }
-  },
-  "scripts": {
-    "build:prod": "run-s check-types lint esbuild:prod",
-    "esbuild": "node esbuild.js",
-    "esbuild:prod": "node esbuild.js --production",
-    "compile": "run-s check-types lint esbuild",
-    "watch": "npm-run-all -p watch:esbuild watch:types",
-    "watch:esbuild": "node esbuild.js --watch",
-    "watch:types": "tsc --noEmit --watch -p ./",
-    "package": "run-s build:prod && vsce package --no-dependencies",
-    "pretest": "run-s compile",
-    "check-types": "tsc --noEmit",
-    "lint": "eslint src",
-    "typecheck": "tsc --noEmit",
-    "test": "node ./out/test/runTest.js",
-    "test:unit": "mocha --ui tdd -r ts-node/register 'src/test/**/*.test.ts'",
-    "test:cli": "ts-node src/cli.ts"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.39.2",
-    "@types/chai": "^5.2.3",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "^25.1.0",
-    "@types/sinon": "^21.0.0",
-    "@types/vscode": "^1.90.0",
-    "@typescript-eslint/eslint-plugin": "^8.54.0",
-    "@typescript-eslint/parser": "^8.54.0",
-    "@vscode/vsce": "^3.7.1",
-    "chai": "^6.2.2",
-    "esbuild": "^0.27.2",
-    "eslint": "^9.39.2",
-    "mocha": "^11.7.5",
-    "npm-run-all": "^4.1.5",
-    "sinon": "^21.0.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0"
-  },
-  "dependencies": {
-    "axios": "^1.13.4"
-  }
+	"name": "altimeter",
+	"displayName": "Altimeter",
+	"description": "An extension for monitoring used/spent tokens in Antigravity IDE. Simple token usage stats.",
+	"version": "0.0.1",
+	"publisher": "pqub",
+	"icon": "resources/icon.png",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/pqub/altimeter.git"
+	},
+	"engines": {
+		"vscode": "^1.90.0"
+	},
+	"categories": [
+		"Other",
+		"Visualization"
+	],
+	"keywords": [
+		"antigravity",
+		"ai",
+		"token",
+		"dashboard",
+		"monitor"
+	],
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "altimeter.refresh",
+				"title": "Refresh Stats",
+				"category": "Altimeter",
+				"icon": "$(refresh)"
+			}
+		],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "altimeter",
+					"title": "Altimeter",
+					"icon": "$(rocket)"
+				}
+			]
+		},
+		"views": {
+			"altimeter": [
+				{
+					"id": "altimeter.mainView",
+					"name": "Token Stats",
+					"type": "webview"
+				}
+			]
+		},
+		"menus": {
+			"view/title": [
+				{
+					"command": "altimeter.refresh",
+					"when": "view == altimeter.mainView",
+					"group": "navigation"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"build:prod": "run-s check-types lint esbuild:prod",
+		"esbuild": "node esbuild.js",
+		"esbuild:prod": "node esbuild.js --production",
+		"compile": "run-s check-types lint esbuild",
+		"watch": "npm-run-all -p watch:esbuild watch:types",
+		"watch:esbuild": "node esbuild.js --watch",
+		"watch:types": "tsc --noEmit --watch -p ./",
+		"package": "run-s build:prod && vsce package --no-dependencies",
+		"pretest": "run-s compile",
+		"check-types": "tsc --noEmit",
+		"lint": "eslint src",
+		"typecheck": "tsc --noEmit",
+		"test": "node ./out/test/runTest.js",
+		"test:unit": "mocha --ui tdd -r ts-node/register 'src/test/**/*.test.ts'",
+		"test:cli": "ts-node src/cli.ts",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"update-deps": "pnpm update -L !@types/vscode"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.39.2",
+		"@types/chai": "^5.2.3",
+		"@types/mocha": "^10.0.10",
+		"@types/node": "^25.1.0",
+		"@types/sinon": "^21.0.0",
+		"@types/vscode": "^1.90.0",
+		"@typescript-eslint/eslint-plugin": "^8.54.0",
+		"@typescript-eslint/parser": "^8.54.0",
+		"@vscode/vsce": "^3.7.1",
+		"chai": "^6.2.2",
+		"esbuild": "^0.27.2",
+		"eslint": "^9.39.2",
+		"eslint-config-prettier": "^10.1.8",
+		"mocha": "^11.7.5",
+		"npm-run-all": "^4.1.5",
+		"ovsx": "^0.10.8",
+		"prettier": "^3.8.1",
+		"sinon": "^21.0.1",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.54.0"
+	},
+	"dependencies": {
+		"axios": "^1.13.4"
+	}
 }

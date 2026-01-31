@@ -3,9 +3,7 @@
 		"module": "commonjs",
 		"target": "es2020",
 		"outDir": "out",
-		"lib": [
-			"es2020"
-		],
+		"lib": ["es2020"],
 		"sourceMap": true,
 		"rootDir": "src",
 		"strict": true,
@@ -14,13 +12,6 @@
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true
 	},
-	"include": [
-		"src/**/*"
-	],
-	"exclude": [
-		"node_modules",
-		".vscode-test",
-		"out",
-		"webview-ui"
-	]
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", ".vscode-test", "out", "webview-ui"]
 }

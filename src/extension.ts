@@ -20,18 +20,18 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 	private _view?: vscode.WebviewView;
 	private _refreshInterval?: NodeJS.Timeout;
 
-	constructor(private readonly _extensionUri: vscode.Uri) { }
+	constructor(private readonly _extensionUri: vscode.Uri) {}
 
 	public resolveWebviewView(
 		webviewView: vscode.WebviewView,
 		_context: vscode.WebviewViewResolveContext, // eslint-disable-line @typescript-eslint/no-unused-vars
-		_token: vscode.CancellationToken // eslint-disable-line @typescript-eslint/no-unused-vars
+		_token: vscode.CancellationToken, // eslint-disable-line @typescript-eslint/no-unused-vars
 	) {
 		this._view = webviewView;
 
 		webviewView.webview.options = {
 			enableScripts: true,
-			localResourceRoots: [this._extensionUri]
+			localResourceRoots: [this._extensionUri],
 		};
 
 		// Set initial loading state
@@ -83,7 +83,9 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	private async _fetchCurrentSessionStats() {
-		if (!this._view) { return; }
+		if (!this._view) {
+			return;
+		}
 
 		try {
 			if (!client) {
@@ -128,7 +130,6 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 			cache.set(latest.cascadeId, latest.lastModifiedTime, stats);
 
 			this._updateHtml({ stats });
-
 		} catch (e: any) {
 			logger.error(`[Sidebar] Error: ${e.message}`);
 			this._updateHtml({ error: e.message });
@@ -136,7 +137,9 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	private _updateHtml(state: { loading?: boolean; error?: string; stats?: AggregatedStats }) {
-		if (!this._view) { return; }
+		if (!this._view) {
+			return;
+		}
 
 		let content = '';
 
@@ -153,10 +156,11 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 			const totalInput = s.totalInput + s.totalCacheRead;
 			const cacheEff = totalInput > 0 ? ((s.totalCacheRead / totalInput) * 100).toFixed(1) : '0';
 
-			const modelsHtml = s.modelBreakdown.map((m, idx) => {
-				const mInput = m.input + m.cacheRead;
-				const mEff = mInput > 0 ? ((m.cacheRead / mInput) * 100).toFixed(1) : '0';
-				return `
+			const modelsHtml = s.modelBreakdown
+				.map((m, idx) => {
+					const mInput = m.input + m.cacheRead;
+					const mEff = mInput > 0 ? ((m.cacheRead / mInput) * 100).toFixed(1) : '0';
+					return `
 					<div class="model-row">
 						<span class="dot" style="background:${COLORS[idx % COLORS.length]}"></span>
 						<div class="model-info">
@@ -167,7 +171,8 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 							<div class="model-meta">Cache: ${mEff}%</div>
 						</div>
 					</div>`;
-			}).join('');
+				})
+				.join('');
 
 			content = `
 				<div class="section">
@@ -275,14 +280,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const provider = new AltimeterViewProvider(context.extensionUri);
 	context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(AltimeterViewProvider.viewType, provider)
+		vscode.window.registerWebviewViewProvider(AltimeterViewProvider.viewType, provider),
 	);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('altimeter.refresh', () => {
 			provider.triggerRefresh();
-		})
+		}),
 	);
 }
 
-export function deactivate() { }
+export function deactivate() {}
