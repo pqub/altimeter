@@ -55,6 +55,7 @@ pnpm run package
 2. **Access**: Look for the **Graph 📈** icon in the VS Code Activity Bar.
 3. **Sidebar**: The Altimeter view will open in the sidebar, displaying token stats for the current session.
 4. **Refresh**: Use the refresh icon in the view title menu to manually fetch the latest stats.
+5. **Statistics Dashboard**: Click the **"Open Statistics"** button (bar chart icon) in the view title menu to open the full dashboard. This view shows detailed horizontal stacked bar charts and daily usage tables for the last 8 days (1 week window).
 
 ## License
 

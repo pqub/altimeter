@@ -420,7 +420,7 @@ export class StatisticsPanel {
 			// 1. Model Tables
 			sortedModels.forEach(model => {
 				const rows = [];
-				let totalIn = 0, totalOut = 0, totalCache = 0;
+				let totalIn = 0, totalOut = 0, totalCache = 0, totalCalls = 0;
 
 				data.forEach(day => {
 					if (day.models[model]) {
@@ -432,12 +432,14 @@ export class StatisticsPanel {
 							date: day.date,
 							input,
 							output: s.outputTokens,
-							cache: eff
+							cache: eff,
+							calls: s.calls
 						});
 
 						totalIn += input;
 						totalOut += s.outputTokens;
 						totalCache += s.cacheReadTokens;
+						totalCalls += s.calls;
 					}
 				});
 
@@ -447,7 +449,8 @@ export class StatisticsPanel {
 						date: 'TOTAL',
 						input: totalIn,
 						output: totalOut,
-						cache: totalEff
+						cache: totalEff,
+						calls: totalCalls
 					});
 				}
 			});
@@ -456,28 +459,33 @@ export class StatisticsPanel {
 			const dailyRows = data.map(day => {
 				const input = day.totals.inputTokens + day.totals.cacheReadTokens;
 				const eff = input > 0 ? Math.round((day.totals.cacheReadTokens / input) * 100) : 0;
+				// Calculate total calls for the day across all models
+				const dayCalls = Object.values(day.models).reduce((sum, model) => sum + (model.calls || 0), 0);
 				return {
 					date: day.date,
 					input,
 					output: day.totals.outputTokens,
-					cache: eff
+					cache: eff,
+					calls: dayCalls
 				};
 			});
 			
 			// Calculate Grand Total
-			let gIn = 0, gOut = 0, gCache = 0;
+			let gIn = 0, gOut = 0, gCache = 0, gCalls = 0;
 			data.forEach(d => {
 				gIn += d.totals.inputTokens + d.totals.cacheReadTokens;
 				gOut += d.totals.outputTokens;
 				gCache += d.totals.cacheReadTokens;
+				gCalls += Object.values(d.models).reduce((sum, model) => sum + (model.calls || 0), 0);
 			});
 			const gEff = gIn > 0 ? Math.round((gCache / gIn) * 100) : 0;
 
-			createTable(container, 'DAILY TOTALS (Aggregated)', dailyRows, {
+			createTable(container, '📊 DAILY TOTALS (Aggregated)', dailyRows, {
 				date: 'GRAND TOTAL',
 				input: gIn,
 				output: gOut,
-				cache: gEff
+				cache: gEff,
+				calls: gCalls
 			});
 		}
 
@@ -495,6 +503,7 @@ function createTable(container, title, rows, totalRow) {
 							<th onclick="sortTable('\${tableId}', 1)">Input ↕</th>
 							<th onclick="sortTable('\${tableId}', 2)">Output ↕</th>
 							<th onclick="sortTable('\${tableId}', 3)">Cache % ↕</th>
+							<th onclick="sortTable('\${tableId}', 4)">API Calls ↕</th>
 						</tr>
 					</thead>
 					<tbody>\`;
@@ -506,6 +515,7 @@ function createTable(container, title, rows, totalRow) {
 						<td>\${formatNumber(row.input)}</td>
 						<td>\${formatNumber(row.output)}</td>
 						<td>\${row.cache}%</td>
+						<td>\${formatNumber(row.calls || 0)}</td>
 					</tr>\`;
 			});
 
@@ -515,6 +525,7 @@ function createTable(container, title, rows, totalRow) {
 						<td>\${formatNumber(totalRow.input)}</td>
 						<td>\${formatNumber(totalRow.output)}</td>
 						<td>\${totalRow.cache}%</td>
+						<td>\${formatNumber(totalRow.calls || 0)}</td>
 					</tr>
 					</tbody>
 				</table>\`;
