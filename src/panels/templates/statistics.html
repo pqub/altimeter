@@ -256,8 +256,22 @@
 				const totalEff = totalIn > 0 ? Math.round((totalCache / totalIn) * 100) : 0;
 
 				// Update Headers
-				document.getElementById('inputHeader').innerHTML = '📥 Input Tokens <span class="total-tag">' + formatNumber(totalIn) + ' (Cache: ' + totalEff + '%)</span>';
-				document.getElementById('outputHeader').innerHTML = '📤 Output Tokens <span class="total-tag">' + formatNumber(totalOut) + '</span>';
+				// Update Headers (Safe DOM manipulation)
+				const inputHeader = document.getElementById('inputHeader');
+				const outputHeader = document.getElementById('outputHeader');
+
+				const createTotalTag = (text) => {
+					const span = document.createElement('span');
+					span.className = 'total-tag';
+					span.textContent = text;
+					return span;
+				};
+
+				inputHeader.textContent = '📥 Input Tokens ';
+				inputHeader.appendChild(createTotalTag(formatNumber(totalIn) + ' (Cache: ' + totalEff + '%)'));
+
+				outputHeader.textContent = '📤 Output Tokens ';
+				outputHeader.appendChild(createTotalTag(formatNumber(totalOut)));
 
 				// Sort models by defined order
 				allModels.sort((a, b) => {
@@ -427,43 +441,82 @@
 				section.className = 'table-section';
 				const tableId = 'tbl-' + Math.random().toString(36).substr(2, 9);
 
-				let html = `
-						<div class="table-title">${title}</div>
-						<table id="${tableId}">
-							<thead>
-								<tr>
-									<th onclick="sortTable('${tableId}', 0)">Date ↕</th>
-									<th onclick="sortTable('${tableId}', 1)">Input ↕</th>
-									<th onclick="sortTable('${tableId}', 2)">Output ↕</th>
-									<th onclick="sortTable('${tableId}', 3)">Cache % ↕</th>
-									<th onclick="sortTable('${tableId}', 4)">API Calls ↕</th>
-								</tr>
-							</thead>
-							<tbody>`;
+				// Title (Handle potentially colored dot separately)
+				const titleDiv = document.createElement('div');
+				titleDiv.className = 'table-title';
+				if (title.includes('<span')) {
+					// Safe partial HTML for the dot only, if provided from trusted internal logic
+					// Or parse strictly. Since 'title' comes from internal logic,
+					// we can use innerHTML here IF we trust our internal strings.
+					// However, robust way:
+					if (title.includes('●')) {
+						const parts = title.split('</span>');
+						const colorPart = parts[0].replace(/.*style="(.*)".*/, '$1');
+						const textPart = parts[1];
+
+						const dot = document.createElement('span');
+						dot.textContent = '●';
+						dot.style.color = 'inherit'; // Fallback
+						// Extract color
+						const colorMatch = title.match(/color:(#[0-9a-fA-F]+)/);
+						if (colorMatch) dot.style.color = colorMatch[1];
+
+						titleDiv.appendChild(dot);
+						titleDiv.appendChild(document.createTextNode(' ' + textPart.trim()));
+					} else {
+						titleDiv.textContent = title;
+					}
+				} else {
+					titleDiv.textContent = title;
+				}
+				section.appendChild(titleDiv);
+
+				const table = document.createElement('table');
+				table.id = tableId;
+
+				// Header
+				const thead = document.createElement('thead');
+				const headerRow = document.createElement('tr');
+				['Date ↕', 'Input ↕', 'Output ↕', 'Cache % ↕', 'API Calls ↕'].forEach((text, i) => {
+					const th = document.createElement('th');
+					th.textContent = text;
+					th.onclick = () => sortTable(tableId, i);
+					headerRow.appendChild(th);
+				});
+				thead.appendChild(headerRow);
+				table.appendChild(thead);
+
+				// Body
+				const tbody = document.createElement('tbody');
+
+				const createCell = (text) => {
+					const td = document.createElement('td');
+					td.textContent = text;
+					return td;
+				}
 
 				rows.forEach(row => {
-					html += `
-							<tr>
-								<td>${row.date}</td>
-								<td>${formatNumber(row.input)}</td>
-								<td>${formatNumber(row.output)}</td>
-								<td>${row.cache}%</td>
-								<td>${formatNumber(row.calls || 0)}</td>
-							</tr>`;
+					const tr = document.createElement('tr');
+					tr.appendChild(createCell(row.date));
+					tr.appendChild(createCell(formatNumber(row.input)));
+					tr.appendChild(createCell(formatNumber(row.output)));
+					tr.appendChild(createCell(row.cache + '%'));
+					tr.appendChild(createCell(formatNumber(row.calls || 0)));
+					tbody.appendChild(tr);
 				});
 
-				html += `
-							<tr class="grand-total">
-								<td>${totalRow.date}</td>
-								<td>${formatNumber(totalRow.input)}</td>
-								<td>${formatNumber(totalRow.output)}</td>
-								<td>${totalRow.cache}%</td>
-								<td>${formatNumber(totalRow.calls || 0)}</td>
-							</tr>
-							</tbody>
-						</table>`;
+				// Total Row
+				const totalTr = document.createElement('tr');
+				totalTr.className = 'grand-total';
+				totalTr.appendChild(createCell(totalRow.date));
+				totalTr.appendChild(createCell(formatNumber(totalRow.input)));
+				totalTr.appendChild(createCell(formatNumber(totalRow.output)));
+				totalTr.appendChild(createCell(totalRow.cache + '%'));
+				totalTr.appendChild(createCell(formatNumber(totalRow.calls || 0)));
+				tbody.appendChild(totalTr);
 
-				section.innerHTML = html;
+				table.appendChild(tbody);
+				section.appendChild(table);
 				container.appendChild(section);
 			}
 

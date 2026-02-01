@@ -174,6 +174,8 @@ export class ProcessHunter {
 					'X-Codeium-Csrf-Token': token,
 					'Connect-Protocol-Version': '1',
 				},
+				// UNSAFE-IGNORE: Localhost development server uses self-signed certificate.
+				// This connection is strictly loopback (127.0.0.1) and necessary for process discovery.
 				rejectUnauthorized: false,
 				timeout: 5000,
 				agent: false,

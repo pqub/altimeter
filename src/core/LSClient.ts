@@ -34,6 +34,8 @@ export class LSClient {
 				'Connect-Protocol-Version': '1',
 				'Content-Type': 'application/json',
 			},
+			// UNSAFE-IGNORE: Localhost development server uses self-signed certificate.
+			// This connection is strictly loopback (127.0.0.1) and necessary for the extension to function.
 			httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 			timeout: TIMING.HTTP_TIMEOUT_MS,
 		});
