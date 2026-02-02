@@ -97,23 +97,19 @@ export class StatisticsPanel {
 			});
 
 			const allMetadata: any[] = [];
+			const allSteps: any[] = [];
+
 			for (const cascade of filtered) {
 				try {
-					const meta = await client.getCascadeMetadata(cascade.cascadeId);
-					if (meta?.generatorMetadata) {
-						for (const item of meta.generatorMetadata) {
-							// NOTE: Support fallback to chatStartMetadata.createdAt for legacy records
-							if (item.timestamp || item.chatModel?.chatStartMetadata?.createdAt) {
-								allMetadata.push(item);
-							}
-						}
-					}
+					const res = await conversationService.fetchAllData(cascade.cascadeId);
+					allMetadata.push(...res.metadata);
+					allSteps.push(...res.steps);
 				} catch {
-					// Skip failed metadata fetches
+					// Skip failed fetches
 				}
 			}
 
-			const dailyStats = DailyStatsAggregator.aggregateByDay(allMetadata, 8);
+			const dailyStats = DailyStatsAggregator.aggregateByDay(allMetadata, allSteps, 8);
 			this._postMessage({ command: 'statsReady', data: dailyStats });
 		} catch (error: any) {
 			this._postMessage({ command: 'error', message: error.message || 'Unknown error' });

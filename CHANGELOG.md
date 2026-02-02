@@ -2,6 +2,21 @@
 
 All notable changes to the "altimeter" extension will be documented in this file.
 
+## [0.0.4]
+
+### ✨ New Features
+
+- **Incremental Caching**: Introduced a high-performance caching system that only fetches "delta" data since the last update, drastically reducing network overhead.
+- **Checkpoint Model Tracking**: Added native support for **Gemini 2.5 Flash** and **Gemini 2.5 Flash Lite**, ensuring accurate tracking of checkpoint operations.
+
+### 🔧 Improvements
+
+- **Enhanced Observability**: Clarified metrics with "Model Calls (Parsed)" to distinguish actual LLM operations from raw LSP network requests.
+
+### 🐛 Fixes
+
+- Synchronized model colors and display order across the Sidebar and Statistics Dashboard for a consistent visual experience.
+
 ## [0.0.3] - 2026-02-01
 
 ### ✨ New Features

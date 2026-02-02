@@ -54,7 +54,14 @@ export class DailyStatsAggregator {
 	/**
 	 * Aggregates metadata items into daily stats grouped by model.
 	 */
-	static aggregateByDay(allMetadata: MetadataItem[], dayCount: number = 8): DailyModelStats[] {
+	/**
+	 * Aggregates metadata items into daily stats grouped by model.
+	 */
+	static aggregateByDay(
+		allMetadata: MetadataItem[],
+		steps: any[] = [],
+		dayCount: number = 8,
+	): DailyModelStats[] {
 		const dailyMap = new Map<string, DailyModelStats>();
 		const today = new Date();
 
@@ -96,6 +103,24 @@ export class DailyStatsAggregator {
 
 			const dayStats = dailyMap.get(dateStr)!;
 			this.addItemToDay(dayStats, item);
+		}
+
+		// Process Steps (All types with model usage)
+		if (steps && steps.length > 0) {
+			for (const step of steps) {
+				const usage = step.modelUsage || step.metadata?.modelUsage;
+				if (usage) {
+					let dateStr = this.extractDateFromStep(step);
+					if (!dateStr) {
+						dateStr = unknownDateStr;
+					}
+
+					if (dailyMap.has(dateStr)) {
+						const dayStats = dailyMap.get(dateStr)!;
+						this.addStepToDay(dayStats, usage);
+					}
+				}
+			}
 		}
 
 		// Remove Unknown Date if empty
@@ -196,6 +221,48 @@ export class DailyStatsAggregator {
 			return parseInt(val, 10) || 0;
 		}
 		return 0;
+	}
+
+	private static extractDateFromStep(step: any): string | null {
+		// Try step.metadata.createdAt
+		const timestamp = step.metadata?.createdAt;
+		if (!timestamp) {
+			return null;
+		}
+
+		try {
+			const date = new Date(timestamp);
+			return this.formatDate(date);
+		} catch {
+			return null;
+		}
+	}
+
+	private static addStepToDay(day: DailyModelStats, usage: any): void {
+		const rawModel = usage.model || 'Unknown';
+		const displayName = getModelDisplayName(rawModel);
+
+		const input = this.toNumber(usage.inputTokens);
+		const output = this.toNumber(usage.outputTokens);
+		const cacheRead = this.toNumber(usage.cacheReadTokens);
+
+		if (!day.models[displayName]) {
+			day.models[displayName] = {
+				inputTokens: 0,
+				outputTokens: 0,
+				cacheReadTokens: 0,
+				calls: 0,
+			};
+		}
+		const modelStats = day.models[displayName];
+		modelStats.inputTokens += input;
+		modelStats.outputTokens += output;
+		modelStats.cacheReadTokens += cacheRead;
+		modelStats.calls++;
+
+		day.totals.inputTokens += input;
+		day.totals.outputTokens += output;
+		day.totals.cacheReadTokens += cacheRead;
 	}
 
 	private static calculateCacheEfficiency(day: DailyModelStats): number {

@@ -36,14 +36,14 @@ async function discoverClient(): Promise<LSClient> {
 	return new LSClient(result.connectPort, result.csrfToken);
 }
 
-function printStats(metadata: any[]): void {
-	if (!metadata || metadata.length === 0) {
-		console.log('  No generation metadata found.');
+function printStats(metadata: any[], steps: any[] = []): void {
+	if ((!metadata || metadata.length === 0) && (!steps || steps.length === 0)) {
+		console.log('  No generation metadata or steps found.');
 		return;
 	}
 
 	// Use the shared StatsService for calculation
-	const stats = StatsService.calculateStats(metadata);
+	const stats = StatsService.calculateStats(metadata, steps); // Updated to accept steps
 
 	console.log('\n📊 Token Usage by Model:');
 	console.log('─'.repeat(80));
@@ -202,8 +202,20 @@ async function main() {
 			}
 
 			console.log(`Fetching stats for: ${cascadeId}`);
-			const data = await conversationService.fetchCascadeMetadata(cascadeId);
-			printStats(data.generatorMetadata || []);
+			console.log(`Fetching stats for: ${cascadeId}`);
+			// Use new offset fetcher
+			const {
+				metadata,
+				steps,
+				apiCalls: lspRequests,
+			} = await conversationService.fetchAllData(cascadeId);
+			// Calculate stats to get parsed calls
+			const stats = StatsService.calculateStats(metadata, steps);
+
+			console.log(`LSP Requests: ${lspRequests}`);
+			console.log(`Model Calls (Parsed): ${stats.totalCalls}`);
+			console.log(`Metadata items: ${metadata.length}, Steps: ${steps.length}`);
+			printStats(metadata, steps);
 		} else if (command === 'daily') {
 			console.log('Gathering daily statistics for the last 8 days...');
 
@@ -214,23 +226,39 @@ async function main() {
 			console.log(`Processing metadata for ${filtered.length} recent conversations...`);
 
 			const allMetadata: any[] = [];
+			const allSteps: any[] = []; // Store steps for daily aggregation
+			let totalApi = 0;
+
 			for (const cascade of filtered) {
 				try {
-					const meta = await conversationService.fetchCascadeMetadata(cascade.cascadeId);
-					if (meta?.generatorMetadata) {
-						for (const item of meta.generatorMetadata) {
+					// Use fetchAllData to get hidden stats
+					const { metadata, steps, apiCalls } = await conversationService.fetchAllData(
+						cascade.cascadeId,
+					);
+					totalApi += apiCalls;
+
+					if (metadata) {
+						for (const item of metadata) {
 							if (!item.timestamp && cascade.lastModifiedTime) {
 								item.timestamp = cascade.lastModifiedTime;
 							}
 							allMetadata.push(item);
 						}
 					}
+					if (steps) {
+						allSteps.push(...steps);
+					}
 				} catch (e: any) {
 					logger.warn(`Skipping metadata for ${cascade.cascadeId}: ${e.message}`);
 				}
 			}
+			console.log(`\nTotal LSP Requests: ${totalApi}`);
 
-			const dailyStats = DailyStatsAggregator.aggregateByDay(allMetadata, 8);
+			// Calculate aggregate for total model calls
+			const finalStats = StatsService.calculateStats(allMetadata, allSteps);
+			console.log(`Total Model Calls (Parsed): ${finalStats.totalCalls}`);
+
+			const dailyStats = DailyStatsAggregator.aggregateByDay(allMetadata, allSteps, 8);
 			printDailyStats(dailyStats);
 		} else {
 			console.log('Available commands: list, stats, daily');

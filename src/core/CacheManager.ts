@@ -12,19 +12,28 @@ interface CacheEntry {
 	lastModifiedTime: string;
 	stats: AggregatedStats;
 	timestamp: number;
+	nextMetaOffset: number;
+	nextStepOffset: number;
 }
 
 export class CacheManager {
 	private cache: CacheEntry | null = null;
 
 	/**
-	 * Check if cached data is still valid for the given session.
+	 * Check if cached session matches the current one.
 	 */
-	isValid(cascadeId: string, lastModifiedTime: string): boolean {
+	isValid(cascadeId: string): boolean {
 		if (!this.cache) {
 			return false;
 		}
-		return this.cache.cascadeId === cascadeId && this.cache.lastModifiedTime === lastModifiedTime;
+		return this.cache.cascadeId === cascadeId;
+	}
+
+	/**
+	 * Get cached entry if available.
+	 */
+	getEntry(): CacheEntry | null {
+		return this.cache;
 	}
 
 	/**
@@ -35,14 +44,22 @@ export class CacheManager {
 	}
 
 	/**
-	 * Store stats in cache with validation metadata.
+	 * Store stats in cache with validation metadata and offsets.
 	 */
-	set(cascadeId: string, lastModifiedTime: string, stats: AggregatedStats): void {
+	set(
+		cascadeId: string,
+		lastModifiedTime: string,
+		stats: AggregatedStats,
+		nextMetaOffset: number,
+		nextStepOffset: number,
+	): void {
 		this.cache = {
 			cascadeId,
 			lastModifiedTime,
 			stats,
 			timestamp: Date.now(),
+			nextMetaOffset,
+			nextStepOffset,
 		};
 	}
 

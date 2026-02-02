@@ -16,6 +16,7 @@ export const LS_ENDPOINTS = {
 		'exa.language_server_pb.LanguageServerService/GetAllCascadeTrajectories',
 	GET_CASCADE_METADATA:
 		'exa.language_server_pb.LanguageServerService/GetCascadeTrajectoryGeneratorMetadata',
+	GET_CASCADE_STEPS: 'exa.language_server_pb.LanguageServerService/GetCascadeTrajectorySteps',
 	GET_UNLEASH_DATA: 'exa.language_server_pb.LanguageServerService/GetUnleashData',
 	GET_USER_STATUS: 'exa.language_server_pb.LanguageServerService/GetUserStatus',
 };

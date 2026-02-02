@@ -27,6 +27,16 @@ export const MODEL_CATALOG: Record<string, ModelInfo> = {
 		color: '#10B981',
 		order: 7,
 	},
+	MODEL_GOOGLE_GEMINI_2_5_FLASH: {
+		displayName: 'Gemini 2.5 Flash',
+		color: '#4285F4',
+		order: 8,
+	},
+	MODEL_GOOGLE_GEMINI_2_5_FLASH_LITE: {
+		displayName: 'Gemini 2.5 Flash Lite',
+		color: '#81C995',
+		order: 9,
+	},
 };
 
 /** Default color for unknown models */
@@ -55,6 +65,18 @@ export function getDisplayNameColorMap(): Record<string, string> {
 		map[info.displayName] = info.color;
 	}
 	return map;
+}
+
+/**
+ * Returns the sort order for a given display name.
+ */
+export function getModelOrder(displayName: string): number {
+	for (const info of Object.values(MODEL_CATALOG)) {
+		if (info.displayName === displayName) {
+			return info.order;
+		}
+	}
+	return 999;
 }
 
 /**

@@ -23,7 +23,11 @@ export class LSClient {
 	public readonly port: number;
 	public readonly token: string;
 
-	constructor(port: number, token: string) {
+	constructor(
+		port: number,
+		token: string,
+		private delayMs: number = 20,
+	) {
 		this.port = port;
 		this.token = token;
 
@@ -45,6 +49,9 @@ export class LSClient {
 	 * Generic request method for any Language Server API endpoint.
 	 */
 	async makeRequest(method: string, payload: object = {}): Promise<any> {
+		if (this.delayMs > 0) {
+			await new Promise((resolve) => setTimeout(resolve, this.delayMs));
+		}
 		console.log(`[LSClient] Making request: ${method}`);
 		try {
 			const response = await this.client.post(`/${method}`, payload);
@@ -64,9 +71,17 @@ export class LSClient {
 		return this.makeRequest(LS_ENDPOINTS.GET_ALL_CASCADE_TRAJECTORIES, {});
 	}
 
-	async getCascadeMetadata(cascadeId: string): Promise<any> {
+	async getCascadeMetadata(cascadeId: string, offset: number = 0): Promise<any> {
 		return this.makeRequest(LS_ENDPOINTS.GET_CASCADE_METADATA, {
 			cascade_id: cascadeId,
+			generator_metadata_offset: offset,
+		});
+	}
+
+	async getCascadeSteps(cascadeId: string, offset: number = 0): Promise<any> {
+		return this.makeRequest(LS_ENDPOINTS.GET_CASCADE_STEPS, {
+			cascade_id: cascadeId,
+			step_offset: offset,
 		});
 	}
 }

@@ -24,18 +24,18 @@ suite('Deep Coverage Test Suite', () => {
 
 		test('should start empty', () => {
 			expect(cacheManager.get()).to.be.null;
-			expect(cacheManager.isValid('id1', 'time1')).to.be.false;
+			expect(cacheManager.isValid('id1')).to.be.false;
 			expect(cacheManager.getInfo()).to.equal('Cache: empty');
 		});
 
 		test('should store and retrieve stats', () => {
-			cacheManager.set('id1', 'time1', mockStats);
+			cacheManager.set('id1', 'time1', mockStats, 0, 0);
 			expect(cacheManager.get()).to.deep.equal(mockStats);
-			expect(cacheManager.isValid('id1', 'time1')).to.be.true;
+			expect(cacheManager.isValid('id1')).to.be.true;
 		});
 
 		test('should invalidate cache', () => {
-			cacheManager.set('id1', 'time1', mockStats);
+			cacheManager.set('id1', 'time1', mockStats, 0, 0);
 			cacheManager.invalidate();
 			expect(cacheManager.get()).to.be.null;
 		});

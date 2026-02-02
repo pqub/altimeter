@@ -40,7 +40,7 @@ suite('DailyStatsAggregator Test Suite', () => {
 			},
 		];
 
-		const stats = DailyStatsAggregator.aggregateByDay(metadata, 2);
+		const stats = DailyStatsAggregator.aggregateByDay(metadata, [], 2);
 		expect(stats).to.have.lengthOf(2);
 
 		const todayStats = stats.find((s) => s.date === today.split('T')[0]);
@@ -65,7 +65,7 @@ suite('DailyStatsAggregator Test Suite', () => {
 			},
 		];
 
-		const stats = DailyStatsAggregator.aggregateByDay(metadata, 1);
+		const stats = DailyStatsAggregator.aggregateByDay(metadata, [], 1);
 		expect(stats[0].totals.inputTokens).to.equal(0);
 		expect(stats[0].models['unknown']).to.exist;
 	});
@@ -89,7 +89,7 @@ suite('DailyStatsAggregator Test Suite', () => {
 		// Depending on current date, we'll just check if it finds it.
 		// For the test, let's just use aggregateByDay and check if '2026-01-20' exists in the map
 		// if we mock enough days.
-		const stats = DailyStatsAggregator.aggregateByDay(metadata, 100);
+		const stats = DailyStatsAggregator.aggregateByDay(metadata, [], 100);
 		const targetStats = stats.find((s) => s.date === dateStr);
 		expect(targetStats).to.exist;
 		expect(targetStats?.totals.inputTokens).to.equal(500);
@@ -105,7 +105,7 @@ suite('DailyStatsAggregator Test Suite', () => {
 			},
 		];
 
-		const stats = DailyStatsAggregator.aggregateByDay(metadata, 1);
+		const stats = DailyStatsAggregator.aggregateByDay(metadata, [], 1);
 		const unknown = stats.find((s) => s.date === 'Unknown Date');
 		expect(unknown).to.exist;
 		expect(unknown?.totals.inputTokens).to.equal(999);
@@ -121,5 +121,29 @@ suite('DailyStatsAggregator Test Suite', () => {
 		// @ts-expect-error - accessing private for testing
 		const formatted = DailyStatsAggregator.formatDate(localDate);
 		expect(formatted).to.equal(dateStr);
+	});
+
+	test('should aggregate checkpoint steps by day', () => {
+		const today = new Date();
+		const dateStr = today.toISOString().split('T')[0];
+
+		const steps = [
+			{
+				type: 'CORTEX_STEP_TYPE_CHECKPOINT',
+				metadata: { createdAt: today.toISOString() },
+				modelUsage: {
+					model: 'MODEL_GOOGLE_GEMINI_2_5_FLASH_LITE',
+					inputTokens: 1000,
+					outputTokens: 500,
+				},
+			},
+		];
+
+		const stats = DailyStatsAggregator.aggregateByDay([], steps, 1);
+		const target = stats.find((s) => s.date === dateStr);
+		expect(target).to.exist;
+		// Gemni 2.5 Flash Lite display name
+		expect(target?.models['Gemini 2.5 Flash Lite']).to.exist;
+		expect(target?.models['Gemini 2.5 Flash Lite'].inputTokens).to.equal(1000);
 	});
 });

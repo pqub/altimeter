@@ -7,7 +7,7 @@
 ## Features
 
 - **Automatic Service Discovery**: Should support separate processes on Windows, macOS, and Linux.
-- **Token Statistics**: Clear breakdown of **Input**, **Cache**, and **Output** tokens.
+- **Token Statistics**: Clear breakdown of **Input**, **Cache**, and **Output** tokens. Includes deep tracking for **Gemini 2.5 Flash** and **Gemini 2.5 Flash Lite** which frequently appear during checkpoint and browser agent operations.
 - **Statistics Dashboard**: Visual horizontal stacked bar charts and daily breakdown tables for long-term usage trends.
 - **Sidebar**: View current session information and usage stats directly in the sidebar.
 
@@ -49,6 +49,10 @@ pnpm run test:unit
 pnpm run package
 ```
 
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
 ## Running the Extension
 
 1. **Install** the `.vsix` file or run in development mode (Press `F5`).
@@ -61,6 +65,14 @@ pnpm run package
 
 - `Altimeter: Refresh Stats`: Manually refresh the data in the side panel.
 - `Altimeter: Open Statistics`: Open the full-screen visual dashboard with historical charts and daily usage tables.
+
+## Privacy & Security
+
+Altimeter is designed with privacy as a core principle:
+
+- **No External Connections**: All data processing and analysis happen locally on your machine. The extension never makes network requests to external servers.
+- **Internal Interaction**: Interactions are strictly limited to the local Antigravity Language Server and internal VS Code APIs.
+- **Secure WebViews**: The dashboard and sidebar WebViews do not load any external scripts, analytics, or trackers. Everything is bundled within the extension.
 
 ## License
 
