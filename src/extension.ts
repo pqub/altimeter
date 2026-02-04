@@ -8,6 +8,8 @@ import { ConversationService } from './services/ConversationService';
 import { StatisticsPanel } from './panels/StatisticsPanel';
 import { AggregatedStats } from './shared/types';
 import { getDisplayNameColorMap } from './shared/ModelCatalog';
+import { TemplateEngine } from './shared/TemplateEngine';
+import sidebarHtml from './panels/templates/sidebar.html';
 
 let client: LSClient | undefined;
 const cache = new CacheManager();
@@ -21,8 +23,30 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 	public static readonly viewType = 'altimeter.mainView';
 	private _view?: vscode.WebviewView;
 	private _refreshInterval?: NodeJS.Timeout;
+	private _chartsExpanded: boolean = false;
 
-	constructor(private readonly _extensionUri: vscode.Uri) {}
+	constructor(private readonly _extensionUri: vscode.Uri) {
+		// Initialize local state from config
+		this._chartsExpanded = vscode.workspace
+			.getConfiguration('altimeter')
+			.get<boolean>('chartsExpanded', false);
+
+		// Listen for configuration changes to keep local state in sync (e.g. manual settings edit)
+		vscode.workspace.onDidChangeConfiguration((e) => {
+			if (e.affectsConfiguration('altimeter.chartsExpanded')) {
+				this._chartsExpanded = vscode.workspace
+					.getConfiguration('altimeter')
+					.get<boolean>('chartsExpanded', false);
+				logger.info(
+					`[Sidebar] Configuration changed externally. _chartsExpanded: ${this._chartsExpanded}`,
+				);
+				// Trigger a re-render if the view is visible
+				if (this._view && this._view.visible) {
+					this._fetchCurrentSessionStats(false);
+				}
+			}
+		});
+	}
 
 	public resolveWebviewView(
 		webviewView: vscode.WebviewView,
@@ -43,6 +67,13 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 		webviewView.webview.onDidReceiveMessage(async (message) => {
 			if (message.command === 'refresh') {
 				await this._fetchCurrentSessionStats();
+			} else if (message.command === 'toggleCharts') {
+				this._chartsExpanded = message.expanded;
+				const config = vscode.workspace.getConfiguration('altimeter');
+				await config.update('chartsExpanded', message.expanded, vscode.ConfigurationTarget.Global);
+				logger.info(
+					`[Sidebar] Charts expanded state updated synchronously to: ${message.expanded}`,
+				);
 			}
 		});
 
@@ -288,28 +319,33 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 				</div>
 
 				<div class="section" style="border-bottom: none">
-					<div class="section-title">Token Distribution</div>
+					<div class="section-title collapsible" id="toggle-charts">
+						<span>Token Distribution</span>
+						<span id="chevron" class="chevron">▶</span>
+					</div>
 					
-					<div class="header-row">
-						<span class="chart-label">Input Distribution</span>
-					</div>
-					<div class="chart-wrapper pie-container">
-						<canvas id="inputPieChart"></canvas>
-					</div>
+					<div id="charts-container" class="hidden">
+						<div class="header-row">
+							<span class="chart-label">Input Distribution</span>
+						</div>
+						<div class="chart-wrapper pie-container">
+							<canvas id="inputPieChart"></canvas>
+						</div>
 
-					<div class="header-row" style="margin-top: 20px">
-						<span class="chart-label">Output Distribution</span>
-					</div>
-					<div class="chart-wrapper pie-container">
-						<canvas id="outputPieChart"></canvas>
+						<div class="header-row" style="margin-top: 20px">
+							<span class="chart-label">Output Distribution</span>
+						</div>
+						<div class="chart-wrapper pie-container">
+							<canvas id="outputPieChart"></canvas>
+						</div>
 					</div>
 				</div>`;
 		}
 
-		this._view.webview.html = this._getHtml(content, chartData);
-	}
+		// Use local tracked state to avoid lag from config.update propagation
+		const chartsExpanded = this._chartsExpanded;
+		logger.info(`[Sidebar] Rendering with chartsExpanded: ${chartsExpanded}`);
 
-	private _getHtml(content: string, chartData: any | null): string {
 		const webview = this._view!.webview;
 		const chartJsUri = webview.asWebviewUri(
 			vscode.Uri.joinPath(this._extensionUri, 'resources', 'libs', 'chart.min.js'),
@@ -340,9 +376,7 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 							responsive: true,
 							maintainAspectRatio: true,
 							plugins: {
-								legend: { 
-									display: false
-								},
+								legend: { display: false },
 								tooltip: {
 									displayColors: false,
 									callbacks: {
@@ -364,97 +398,49 @@ class AltimeterViewProvider implements vscode.WebviewViewProvider {
 			</script>`
 			: '';
 
-		return `<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="Content-Security-Policy" content="${csp}">
-	<script src="${chartJsUri}"></script>
-	<style>
-		body {
-			font-family: var(--vscode-font-family);
-			font-size: 11px;
-			color: var(--vscode-foreground);
-			padding: 8px 10px;
-			margin: 0;
-			overflow-x: hidden;
-		}
-		.center {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			min-height: 100px;
-			gap: 8px;
-		}
-		.section {
-			margin-bottom: 14px;
-			padding-bottom: 8px;
-			border-bottom: 1px solid var(--vscode-panel-border);
-		}
-		.section-title {
-			font-size: 10px;
-			opacity: 0.6;
-			margin-bottom: 6px;
-			font-weight: 600;
-			text-transform: uppercase;
-			letter-spacing: 0.5px;
-		}
-		.chart-wrapper.pie-container {
-			height: 160px;
-			margin: 10px auto;
-			display: flex;
-			justify-content: center;
-		}
-		.row {
-			display: flex;
-			justify-content: space-between;
-			padding: 2px 0;
-		}
-		.value {
-			font-weight: 600;
-			color: var(--vscode-textLink-foreground);
-		}
-		.model-row {
-			display: flex;
-			align-items: flex-start;
-			gap: 6px;
-			margin-bottom: 6px;
-		}
-		.dot {
-			width: 7px;
-			height: 7px;
-			border-radius: 50%;
-			margin-top: 3px;
-			flex-shrink: 0;
-		}
-		.model-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-		.model-name { font-weight: 500; font-size: 11px; }
-		.model-details { font-size: 9px; opacity: 0.7; }
-		.model-meta { font-size: 9px; opacity: 0.5; }
-		.header-row {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			margin-top: 8px;
-		}
-		.chart-label { font-size: 10px; font-weight: 500; opacity: 0.8; }
-	</style>
-</head>
-<body>
-	${content}
-	${chartScript}
-	<script>
-		const vscode = acquireVsCodeApi();
-		document.addEventListener('click', (e) => {
-			if (e.target.id === 'refresh' || e.target.id === 'retry') {
-				vscode.postMessage({ command: 'refresh' });
-			}
+		const initialScript = `
+			<script>
+				(function() {
+					const chartsContainer = document.getElementById('charts-container');
+					const chevron = document.getElementById('chevron');
+					const toggleCharts = document.getElementById('toggle-charts');
+					let isExpanded = ${chartsExpanded};
+
+					function updateUI() {
+						if (!chartsContainer || !chevron) return;
+						if (isExpanded) {
+							chartsContainer.classList.remove('hidden');
+							chevron.innerText = '▼';
+						} else {
+							chartsContainer.classList.add('hidden');
+							chevron.innerText = '▶';
+						}
+					}
+
+					// Apply initial state
+					updateUI();
+
+					if (toggleCharts) {
+						toggleCharts.addEventListener('click', () => {
+							isExpanded = !isExpanded;
+							updateUI();
+							console.log('Sidebar toggleCharts:', isExpanded);
+							window.vscode.postMessage({ 
+								command: 'toggleCharts', 
+								expanded: isExpanded 
+							});
+						});
+					}
+				})();
+			</script>`;
+
+		this._view.webview.html = TemplateEngine.render(sidebarHtml, {
+			csp,
+			chartJsUri: chartJsUri.toString(),
+			content,
+			chartScript: chartScript || '',
+			initialScript,
 		});
-	</script>
-</body>
-</html>`;
 	}
 }
 

@@ -15,7 +15,7 @@
 		"url": "https://github.com/pqub/altimeter.git"
 	},
 	"engines": {
-		"vscode": "^1.90.0"
+		"vscode": "^1.104.0"
 	},
 	"categories": [
 		"Other",
@@ -78,6 +78,16 @@
 					"group": "navigation"
 				}
 			]
+		},
+		"configuration": {
+			"title": "Altimeter",
+			"properties": {
+				"altimeter.chartsExpanded": {
+					"type": "boolean",
+					"default": false,
+					"description": "Whether the token distribution charts are expanded by default in the sidebar."
+				}
+			}
 		}
 	},
 	"scripts": {
@@ -114,9 +124,9 @@
 		"@eslint/js": "^9.39.2",
 		"@types/chai": "^5.2.3",
 		"@types/mocha": "^10.0.10",
-		"@types/node": "^25.1.0",
+		"@types/node": "^25.2.0",
 		"@types/sinon": "^21.0.0",
-		"@types/vscode": "^1.90.0",
+		"@types/vscode": "^1.104.1",
 		"@typescript-eslint/eslint-plugin": "^8.54.0",
 		"@typescript-eslint/parser": "^8.54.0",
 		"@vscode/vsce": "^3.7.1",
