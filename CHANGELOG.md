@@ -2,7 +2,7 @@
 
 All notable changes to the "altimeter" extension will be documented in this file.
 
-## [0.0.4]
+## [0.0.4] - 2026-02-04
 
 ### ✨ New Features
 
