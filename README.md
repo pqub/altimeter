@@ -3,6 +3,7 @@
 **Altimeter** is an extension for monitoring used/spent tokens in Antigravity IDE, providing simple yet powerful token usage stats. It brings deep observability to the Antigravity Language Server, offering a visual dashboard for monitoring session performance and model-specific usage metrics directly in the IDE.
 
 ![Altimeter Sidebar Demo](docs/sidebar.jpg)
+![Altimeter Screenshot](docs/screenshot.png)
 
 ## Features
 
