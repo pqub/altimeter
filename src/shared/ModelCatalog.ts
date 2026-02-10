@@ -16,26 +16,27 @@ export const MODEL_CATALOG: Record<string, ModelInfo> = {
 	MODEL_PLACEHOLDER_M8: { displayName: 'Gemini 3 Pro (High)', color: '#185ABC', order: 2 },
 	MODEL_PLACEHOLDER_M7: { displayName: 'Gemini 3 Pro (Low)', color: '#1A73E8', order: 3 },
 	MODEL_PLACEHOLDER_M12: { displayName: 'Claude Opus 4.5 (Thinking)', color: '#FF6B35', order: 4 },
+	MODEL_CLAUDE_OPUS_4_6: { displayName: 'Claude Opus 4.6', color: '#D94A2F', order: 5 },
 	MODEL_CLAUDE_4_5_SONNET_THINKING: {
 		displayName: 'Claude Sonnet 4.5 (Thinking)',
 		color: '#E37400',
-		order: 5,
+		order: 6,
 	},
-	MODEL_CLAUDE_4_5_SONNET: { displayName: 'Claude Sonnet 4.5', color: '#F9AB00', order: 6 },
+	MODEL_CLAUDE_4_5_SONNET: { displayName: 'Claude Sonnet 4.5', color: '#F9AB00', order: 7 },
 	MODEL_OPENAI_GPT_OSS_120B_MEDIUM: {
 		displayName: 'GPT-OSS 120B (Medium)',
 		color: '#10B981',
-		order: 7,
+		order: 8,
 	},
 	MODEL_GOOGLE_GEMINI_2_5_FLASH: {
 		displayName: 'Gemini 2.5 Flash',
 		color: '#4285F4',
-		order: 8,
+		order: 9,
 	},
 	MODEL_GOOGLE_GEMINI_2_5_FLASH_LITE: {
 		displayName: 'Gemini 2.5 Flash Lite',
 		color: '#81C995',
-		order: 9,
+		order: 10,
 	},
 };
 
