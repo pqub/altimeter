@@ -7,6 +7,7 @@ suite('ModelCatalog Test Suite', () => {
 		expect(getModelDisplayName('MODEL_CLAUDE_4_5_SONNET_THINKING')).to.equal(
 			'Claude Sonnet 4.5 (Thinking)',
 		);
+		expect(getModelDisplayName('MODEL_CLAUDE_OPUS_4_6')).to.equal('Claude Opus 4.6');
 	});
 
 	test('should fall back to original key for unknown models', () => {
@@ -23,7 +24,12 @@ suite('ModelCatalog Test Suite', () => {
 		expect(MODEL_CATALOG['MODEL_OPENAI_GPT_OSS_120B_MEDIUM']).to.deep.equal({
 			displayName: 'GPT-OSS 120B (Medium)',
 			color: '#10B981',
-			order: 7,
+			order: 8,
+		});
+		expect(MODEL_CATALOG['MODEL_CLAUDE_OPUS_4_6']).to.deep.equal({
+			displayName: 'Claude Opus 4.6',
+			color: '#D94A2F',
+			order: 5,
 		});
 	});
 });
