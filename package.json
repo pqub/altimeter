@@ -2,7 +2,7 @@
 	"name": "altimeter",
 	"displayName": "Altimeter",
 	"description": "An extension for monitoring used/spent tokens in Antigravity IDE. Simple token usage stats.",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"publisher": "pqub",
 	"license": "MIT",
 	"homepage": "https://github.com/pqub/altimeter#readme",

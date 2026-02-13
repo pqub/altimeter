@@ -7,10 +7,16 @@
 
 ## Features
 
-- **Automatic Service Discovery**: Should support separate processes on Windows, macOS, and Linux.
+- **Automatic Service Discovery**: Should support separate processes on Windows, macOS, and Linux. See [Architecture](docs/ARCHITECTURE.md) for details.
 - **Token Statistics**: Clear breakdown of **Input**, **Cache**, and **Output** tokens. Includes deep tracking for **Gemini 2.5 Flash** and **Gemini 2.5 Flash Lite** which frequently appear during checkpoint and browser agent operations.
 - **Statistics Dashboard**: Visual horizontal stacked bar charts and daily breakdown tables for long-term usage trends.
 - **Sidebar**: View current session information and usage stats directly in the sidebar.
+
+## Documentation
+
+- [Architecture Overview](docs/ARCHITECTURE.md) - How Altimeter works under the hood.
+- [Contributing Guide](docs/CONTRIBUTING.md) - How to set up the repo and contribute.
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and fixes.
 
 ## Inspiration & References
 

@@ -83,12 +83,34 @@ export class ProcessHunter {
 				const candidates = this.strategy.parseProcessInfo(stdout);
 				if (candidates.length > 0) {
 					this.lastDiagnostics.found_candidates = candidates.length;
+					logger.info(`Found ${candidates.length} LS candidate(s). Evaluating all...`);
+
+					// Collect all valid connections
+					const validResults: Array<{ result: EnvironmentScanResult; latestTime: string }> = [];
+
 					for (const info of candidates) {
 						const result = await this.verifyAndConnect(info);
 						if (result) {
-							return result;
+							// Query the most recent conversation timestamp from this LS
+							const latestTime = await this.getLatestConversationTime(result.connectPort, result.csrfToken);
+							logger.info(`  LS on port ${result.connectPort} (PID ${info.pid}): latest conversation = ${latestTime || 'none'}`);
+							validResults.push({ result, latestTime: latestTime || '' });
 						}
 					}
+
+					if (validResults.length === 0) {
+						continue;
+					}
+
+					// If only one valid result, return it directly
+					if (validResults.length === 1) {
+						return validResults[0].result;
+					}
+
+					// Pick the LS with the most recent conversation
+					validResults.sort((a, b) => b.latestTime.localeCompare(a.latestTime));
+					logger.info(`Selected LS on port ${validResults[0].result.connectPort} (most recent: ${validResults[0].latestTime})`);
+					return validResults[0].result;
 				}
 			} catch (e: any) {
 				logger.error(`Attempt ${i + 1} failed: ${e.message}`);
@@ -99,6 +121,41 @@ export class ProcessHunter {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Query the most recent conversation timestamp from an LS instance.
+	 * Used to pick the correct LS when multiple instances are running.
+	 */
+	private async getLatestConversationTime(port: number, token: string): Promise<string | null> {
+		try {
+			const axios = (await import('axios')).default;
+			const response = await axios.post(
+				`https://127.0.0.1:${port}/${LS_ENDPOINTS.GET_ALL_CASCADE_TRAJECTORIES}`,
+				{},
+				{
+					headers: {
+						'X-Codeium-Csrf-Token': token,
+						'Connect-Protocol-Version': '1',
+						'Content-Type': 'application/json',
+					},
+					httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+					timeout: 5000,
+				},
+			);
+
+			const summaries = response.data?.trajectorySummaries || {};
+			let latestTime = '';
+			for (const summary of Object.values(summaries as Record<string, any>)) {
+				const time = summary.lastModifiedTime || '';
+				if (time > latestTime) {
+					latestTime = time;
+				}
+			}
+			return latestTime || null;
+		} catch {
+			return null;
+		}
 	}
 
 	private async scanByKeyword(): Promise<EnvironmentScanResult | null> {
